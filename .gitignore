@@ -1,0 +1,7 @@
+node_modules
+./node_modules
+.env
+./src/config/.env
+./src/config/*
+migrations
+.sequelizerc
