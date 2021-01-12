@@ -11,4 +11,6 @@ router.get(
   productController.getProducts
 );
 
+router.get("/search/products", productController.getPaginatedSearchResults);
+
 module.exports = router;

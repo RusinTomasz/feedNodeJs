@@ -10,6 +10,10 @@ const Product = sequelize.define("products", {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  productLink: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   imageLink: {
     type: DataTypes.STRING,
     allowNull: true,
@@ -31,11 +35,11 @@ const Product = sequelize.define("products", {
     allowNull: true,
   },
   price: {
-    type: DataTypes.STRING,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
   },
   salePrice: {
-    type: DataTypes.STRING,
+    type: DataTypes.DECIMAL(10, 2),
     allowNull: true,
   },
   active: {

@@ -13,7 +13,14 @@ paginatedResults = (model) => {
         .findAndCountAll({
           offset: offset,
           limit: limit,
-          attributes: ["id", "title", "description", "imageLink", "price"],
+          attributes: [
+            "id",
+            "title",
+            "description",
+            "productLink",
+            "imageLink",
+            "price",
+          ],
         })
         .then((result) => result)
         .catch((error) => {

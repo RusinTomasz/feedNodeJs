@@ -118,12 +118,14 @@ class FeedService {
 
   saveFeedToDb = async (feedItems, feedId) => {
     const feed = feedItems.map((item) => {
+      var regex = /[\d|,|.|e|E|\+]+/g;
       const feedItem = {
         id: item["g:id"] ? item["g:id"][0] : "",
         title: item["g:title"] ? item["g:title"][0] : "",
         description: item["g:description"]
           ? striptags(item["g:description"][0])
           : "",
+        productLink: item["g:link"] ? item["g:link"][0] : "",
         imageLink: item["g:image_link"] ? item["g:image_link"][0] : "",
         availability: item["g:availability"] ? item["g:availability"][0] : "",
         condition: item["g:condition"] ? item["g:condition"][0] : "",
@@ -133,13 +135,20 @@ class FeedService {
         googleProductCategory: item["g:google_product_category"]
           ? item["g:google_product_category"][0]
           : "",
-        price: item["g:price"] ? item["g:price"][0] : "",
-        salePrice: item["g:sale_price"] ? item["g:sale_price"][0] : "",
+        price: item["g:price"]
+          ? parseFloat(item["g:price"][0].match(regex)[0].replace(/,/g, "."))
+          : "",
+        salePrice: item["g:sale_price"]
+          ? parseFloat(
+              item["g:sale_price"][0].match(regex)[0].replace(/,/g, ".")
+            )
+          : "",
       };
 
       const product = Product.create({
         title: feedItem.title,
         description: feedItem.description,
+        productLink: feedItem.productLink,
         imageLink: feedItem.imageLink,
         availability: feedItem.availability,
         condition: feedItem.condition,

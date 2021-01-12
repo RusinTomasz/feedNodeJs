@@ -5,7 +5,7 @@ const isAuth = require("../middleware/is-auth");
 
 const router = express.Router();
 
-// router.get("/domain", domainController.getDomain);
+router.get("/domain", domainController.getDomainsNamesWithFeedsIds);
 
 router.post(
   "/domain/create",

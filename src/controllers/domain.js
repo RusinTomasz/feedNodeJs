@@ -17,6 +17,20 @@ exports.createDomain = async (req, res, next) => {
   }
 };
 
+exports.getDomainsNamesWithFeedsIds = async (req, res, next) => {
+  try {
+    const domainServiceInstance = new DomainService();
+    const domains = await domainServiceInstance.getDomainsNamesWithFeedsIds();
+    if (domains instanceof Error) {
+      throw createError(422, domains);
+    } else {
+      res.status(201).json({ domains });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 // exports.editDomain = async (req, res, next) => {
 //   try {
 //     const domainServiceInstance = new DomainService();
