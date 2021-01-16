@@ -17,7 +17,6 @@ exports.getProducts = async (req, res, next) => {
 };
 
 exports.getPaginatedSearchResults = async (req, res, next) => {
-  const { shops } = req.query;
   const queryParams = req.query;
 
   try {
