@@ -1,8 +1,13 @@
 paginatedResults = (model) => {
   return async (req, res, next) => {
     try {
-      const { page } = req.query;
-      let limit = 16;
+      const { page, size } = req.query;
+      let limit;
+      if (size) {
+        limit = +size;
+      } else {
+        limit = 16;
+      }
       let offset = 0;
       let endIndex = limit * page;
       if (page > 0) {

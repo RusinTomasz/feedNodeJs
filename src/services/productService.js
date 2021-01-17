@@ -5,9 +5,13 @@ class ProductService {
 
   getPaginatedSearchResults = async (model, queryParams) => {
     const searchWhereObject = await this.prepareSearchWhereObject(queryParams);
-    const { page } = queryParams;
-
-    let limit = 16;
+    const { page, size } = queryParams;
+    let limit;
+    if (size) {
+      limit = +size;
+    } else {
+      limit = 16;
+    }
     let offset = 0;
     let endIndex = limit * page;
     if (page > 0) {
