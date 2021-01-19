@@ -3,6 +3,7 @@ const fetch = require("node-fetch");
 const xml2js = require("xml2js");
 const Product = require("../models/product");
 const striptags = require("striptags");
+const numeral = require("numeral");
 
 class FeedService {
   constructor() {}
@@ -130,6 +131,7 @@ class FeedService {
       let title;
       let description;
       let link;
+      let price;
 
       if (item["title"]) {
         title = item["title"][0];
@@ -153,6 +155,23 @@ class FeedService {
         link = item["g:link"][0];
       } else {
         link = null;
+      }
+
+      if (item["g:price"] && item["g:price"][0]) {
+        const priceArr = item["g:price"][0].match(regex)[0].split("");
+        const thirdletterFromTheEnd = priceArr.length - 3;
+
+        if (priceArr[thirdletterFromTheEnd] === ",") {
+          priceArr[thirdletterFromTheEnd] = ".";
+
+          const newPrice = priceArr.join("");
+
+          price = numeral(newPrice).value();
+        } else {
+          price = numeral(item["g:price"][0].match(regex)[0]).value();
+        }
+      } else {
+        price = null;
       }
 
       const feedItem = {
@@ -181,10 +200,10 @@ class FeedService {
           item["g:google_product_category"][0]
             ? item["g:google_product_category"][0]
             : null,
-        price:
-          item["g:price"] && item["g:price"][0]
-            ? parseFloat(item["g:price"][0].match(regex)[0].replace(/,/g, "."))
-            : null,
+        price: price,
+        // item["g:price"] && item["g:price"][0]
+        //   ? parseFloat(item["g:price"][0].match(regex)[0].replace(/,/g, "."))
+        //   : null,
         salePrice:
           item["g:sale_price"] && item["g:sale_price"][0]
             ? parseFloat(
