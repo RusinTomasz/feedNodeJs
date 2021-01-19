@@ -132,6 +132,7 @@ class FeedService {
       let description;
       let link;
       let price;
+      let salePrice;
 
       if (item["title"]) {
         title = item["title"][0];
@@ -160,18 +161,29 @@ class FeedService {
       if (item["g:price"] && item["g:price"][0]) {
         const priceArr = item["g:price"][0].match(regex)[0].split("");
         const thirdletterFromTheEnd = priceArr.length - 3;
-
         if (priceArr[thirdletterFromTheEnd] === ",") {
           priceArr[thirdletterFromTheEnd] = ".";
-
           const newPrice = priceArr.join("");
-
           price = numeral(newPrice).value();
         } else {
           price = numeral(item["g:price"][0].match(regex)[0]).value();
         }
       } else {
         price = null;
+      }
+
+      if (item["g:sale_price"] && item["g:sale_price"][0]) {
+        const salePriceArr = item["g:sale_price"][0].match(regex)[0].split("");
+        const thirdletterFromTheEnd = salePriceArr.length - 3;
+        if (salePriceArr[thirdletterFromTheEnd] === ",") {
+          salePriceArr[thirdletterFromTheEnd] = ".";
+          const newPrice = salePriceArr.join("");
+          salePrice = numeral(newPrice).value();
+        } else {
+          salePrice = numeral(item["g:sale_price"][0].match(regex)[0]).value();
+        }
+      } else {
+        salePrice = null;
       }
 
       const feedItem = {
@@ -201,15 +213,7 @@ class FeedService {
             ? item["g:google_product_category"][0]
             : null,
         price: price,
-        // item["g:price"] && item["g:price"][0]
-        //   ? parseFloat(item["g:price"][0].match(regex)[0].replace(/,/g, "."))
-        //   : null,
-        salePrice:
-          item["g:sale_price"] && item["g:sale_price"][0]
-            ? parseFloat(
-                item["g:sale_price"][0].match(regex)[0].replace(/,/g, ".")
-              )
-            : null,
+        salePrice: salePrice,
       };
 
       const product = Product.create({
