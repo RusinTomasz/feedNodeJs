@@ -7,7 +7,7 @@ const Product = sequelize.define("products", {
     allowNull: true,
   },
   description: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(6000),
     allowNull: true,
   },
   productLink: {

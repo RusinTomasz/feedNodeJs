@@ -3,7 +3,6 @@ const fetch = require("node-fetch");
 const xml2js = require("xml2js");
 const Product = require("../models/product");
 const striptags = require("striptags");
-const { response } = require("express");
 
 class FeedService {
   constructor() {}
@@ -60,7 +59,9 @@ class FeedService {
           throw "Something goes wrong!";
         }
       })
-      .then((body) => this.parseFeedToJson(body, feedId))
+      .then((body) => {
+        return this.parseFeedToJson(body, feedId);
+      })
       .catch((error) => {
         return error;
       });
@@ -95,7 +96,13 @@ class FeedService {
       .parseStringPromise(feed)
       .then((result) => {
         feedProducts = result;
-        return this.saveFeedToDb(result.rss.channel[0].item, feedId);
+        let feedItems;
+        if (result.feed && result.feed.entry) {
+          feedItems = result.feed.entry;
+        } else {
+          feedItems = result.rss.channel[0].item;
+        }
+        return this.saveFeedToDb(feedItems, feedId);
       })
       .then(() => this.removeDeactivatedProducts(feedId))
       .catch((error) => {
@@ -119,30 +126,71 @@ class FeedService {
   saveFeedToDb = async (feedItems, feedId) => {
     const feed = feedItems.map((item) => {
       var regex = /[\d|,|.|e|E|\+]+/g;
+
+      let title;
+      let description;
+      let link;
+
+      if (item["title"]) {
+        title = item["title"][0];
+      } else if (item["g:title"]) {
+        title = item["g:title"][0];
+      } else {
+        title = null;
+      }
+
+      if (item["description"]) {
+        description = striptags(item["description"][0]);
+      } else if (item["g:description"]) {
+        description = striptags(item["g:description"][0]);
+      } else {
+        description = null;
+      }
+
+      if (item["link"]) {
+        link = item["link"][0];
+      } else if (item["g:link"]) {
+        link = item["g:link"][0];
+      } else {
+        link = null;
+      }
+
       const feedItem = {
-        id: item["g:id"] ? item["g:id"][0] : "",
-        title: item["g:title"] ? item["g:title"][0] : "",
-        description: item["g:description"]
-          ? striptags(item["g:description"][0])
-          : "",
-        productLink: item["g:link"] ? item["g:link"][0] : "",
-        imageLink: item["g:image_link"] ? item["g:image_link"][0] : "",
-        availability: item["g:availability"] ? item["g:availability"][0] : "",
-        condition: item["g:condition"] ? item["g:condition"][0] : "",
-        identifierExists: item["g:identifier_exists"]
-          ? item["g:identifier_exists"][0]
-          : "",
-        googleProductCategory: item["g:google_product_category"]
-          ? item["g:google_product_category"][0]
-          : "",
-        price: item["g:price"]
-          ? parseFloat(item["g:price"][0].match(regex)[0].replace(/,/g, "."))
-          : "",
-        salePrice: item["g:sale_price"]
-          ? parseFloat(
-              item["g:sale_price"][0].match(regex)[0].replace(/,/g, ".")
-            )
-          : "",
+        id: item["g:id"] ? item["g:id"][0] : null,
+        title: title,
+        description: description,
+        productLink: link,
+        imageLink:
+          item["g:image_link"] && item["g:image_link"][0]
+            ? item["g:image_link"][0]
+            : null,
+        availability:
+          item["g:availability"] && item["g:availability"][0]
+            ? item["g:availability"][0]
+            : null,
+        condition:
+          item["g:condition"] && item["g:condition"][0]
+            ? item["g:condition"][0]
+            : null,
+        identifierExists:
+          item["g:identifier_exists"] && item["g:identifier_exists"][0]
+            ? item["g:identifier_exists"][0]
+            : null,
+        googleProductCategory:
+          item["g:google_product_category"] &&
+          item["g:google_product_category"][0]
+            ? item["g:google_product_category"][0]
+            : null,
+        price:
+          item["g:price"] && item["g:price"][0]
+            ? parseFloat(item["g:price"][0].match(regex)[0].replace(/,/g, "."))
+            : null,
+        salePrice:
+          item["g:sale_price"] && item["g:sale_price"][0]
+            ? parseFloat(
+                item["g:sale_price"][0].match(regex)[0].replace(/,/g, ".")
+              )
+            : null,
       };
 
       const product = Product.create({
